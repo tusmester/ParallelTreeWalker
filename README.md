@@ -7,8 +7,9 @@ An extensible and highly scalable **.Net component** for processing elements in 
 * **efficient**: consumed resources depend only on how many parallel operations you allow, not on the size of the tree.
 * **async**: when a tree element is visited, you can perform an asynchronous operation (e.g. execute a database command or web request).
 
-## Usage
+[Latest release](https://github.com/tusmester/ParallelTreeWalker/releases/latest)
 
+## Usage
 First implement the *ITreeElement* interface (relax, it is simple) to represent your tree element - or if you want to discover the file system, you can use the built-in *FileSystemElement* class.
 
 Just call the *WalkAsync* method with a root element and it will do the rest. In the options parameter you can define a callback function (*ProcessElementAsync*) that will be executed every time a tree element is reached.
