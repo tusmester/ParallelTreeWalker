@@ -56,11 +56,11 @@ namespace ParallelTreeWalker
             // enter the main processing phase
             await _mainSemaphore.WaitAsync();
 
-            //process root element
+            //process root element first
             await _options.ProcessElementAsync(_rootElement);
 
             // algorithm: recursive, limited by the max degree of parallelism option
-            await StartProcessingChildren(_rootElement);
+            await StartProcessingChildrenAsync(_rootElement);
 
             // check if there is any work to do (e.g. no folders and files at all)
             if (TreeWalkIsCompleted())
@@ -73,7 +73,7 @@ namespace ParallelTreeWalker
             await _mainSemaphore.WaitAsync();
         }
 
-        private async Task StartProcessingChildren(ITreeElement element)
+        private async Task StartProcessingChildrenAsync(ITreeElement element)
         {
             // This methods enumerates direct child elements and starts
             // tasks for creating them - but only in a pace as there are
@@ -81,20 +81,24 @@ namespace ParallelTreeWalker
             // max degree of parallelism).
 
             var children = element.Children;
-            if (children == null)
-                return;
-
-            // start tasks for child elements
-            foreach (var childElemenet in children)
+            if (children != null)
             {
-                // start a new task only if we did not exceed the max concurrent limit 
-                await _workerSemaphore.WaitAsync();
+                // start tasks for child elements
+                foreach (var childElemenet in children)
+                {
+                    // start a new task only if we did not exceed the max concurrent limit 
+                    await _workerSemaphore.WaitAsync();
 
-                // start the task but do not wait for it
-#pragma warning disable CS4014 // Because this call is not awaited...
+#pragma warning disable CS4014
+                    // start the task but do not wait for it
                     ProcessElementAsync(childElemenet);
-#pragma warning restore CS4014                
+#pragma warning restore CS4014
+                }
             }
+
+            // this makes sure that the process ends after processing the last, empty container
+            if (TreeWalkIsCompleted())
+                _mainSemaphore.Release();
         }
         private async Task ProcessElementAsync(ITreeElement element)
         {
@@ -102,6 +106,7 @@ namespace ParallelTreeWalker
             {
                 await _options.ProcessElementAsync(element);
 
+                // after a container has been processed, it is allowed to deal with its children
                 if (element.IsContainer)
                     _containerCollection.TryAdd(element);
             }
@@ -124,9 +129,9 @@ namespace ParallelTreeWalker
             if (!_containerCollection.TryTake(out container))
                 return false;
 
-            // Suppress warning, DO NOT WAIT for this task
 #pragma warning disable CS4014
-            StartProcessingChildren(container);
+            // start the task but do not wait for it
+            StartProcessingChildrenAsync(container);
 #pragma warning restore CS4014
 
             return true;

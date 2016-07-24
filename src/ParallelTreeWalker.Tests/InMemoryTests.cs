@@ -63,24 +63,38 @@ namespace ParallelTreeWalker.Tests
             await TestWalk(root, 9, 2);
         }
 
-        //====================================================================== Parallel test
+        //====================================================================== Parallel tests
 
         [TestMethod]
         public async Task TwoLevels_Balanced_Parallel()
         {
             var root = GetTree_TwoLevels_Balanced();
-            await TestWalk(root, 7, 3, 1000, 4100);
+            await TestWalk(root, 7, 3, 1000, 4000, 4100);
         }
         [TestMethod]
         public async Task FourLevels_Unbalanced_Parallel()
         {
             var root = GetTree_FourLevels_Unbalanced_2();
-            await TestWalk(root, 21, 5, 1000, 7100);
+            await TestWalk(root, 21, 5, 1000, 7000, 7100);
+        }
+        [TestMethod]
+        public async Task DeepTree_Parallel_Sequential()
+        {
+            // Parents are processed before children, so parallel behavior cannot occur
+            // here. Containers are processed sequentially, one after the other.
+            var root = GetTree_Deep();
+            await TestWalk(root, 6, 10, 500, 3000, 3100);
+        }
+        [TestMethod]
+        public async Task WideTree_Parallel()
+        {
+            var root = GetTree_Wide();
+            await TestWalk(root, 61, 10, 1000, 7000, 7100);
         }
 
         //====================================================================== Walk
 
-        public async Task TestWalk(ITreeElement root, int elementCount, int maxParallel, int delay = 0, int expectedMaxTime = 0)
+        public async Task TestWalk(ITreeElement root, int elementCount, int maxParallel, int delay = 0, int expectedMinTime = 0, int expectedMaxTime = 0)
         {
             var allElements = new ConcurrentBag<TestElement>();
             var stopwatch = new Stopwatch();
@@ -108,7 +122,10 @@ namespace ParallelTreeWalker.Tests
             Trace.WriteLine(string.Format("##PTW> ELAPSED: {0}", stopwatch.ElapsedMilliseconds));
 
             if (delay > 0)
+            {
+                Assert.IsTrue(stopwatch.ElapsedMilliseconds >= expectedMinTime);
                 Assert.IsTrue(stopwatch.ElapsedMilliseconds < expectedMaxTime);
+            }
 
             Assert.AreEqual(elementCount, allElements.Count);
             Assert.IsTrue(allElements.All(e => e.Visited));
@@ -275,6 +292,85 @@ namespace ParallelTreeWalker.Tests
                         }
                     },
                     GetTree_OneLevel_OnlyLeaves()
+                }
+            };
+        }
+        private static ITreeElement GetTree_Deep()
+        {
+            // R
+            // +---C
+            //     +---C
+            //         +---C
+            //             +---C
+            //                 +---C
+
+            return new TestElement()
+            {
+                IsContainer = true,
+                Children = new ITreeElement[]
+                {
+                    new TestElement()
+                    {
+                        IsContainer = true,
+                        Children = new ITreeElement[]
+                        {
+                            new TestElement()
+                            {
+                                IsContainer = true,
+                                Children = new ITreeElement[]
+                                {
+                                    new TestElement()
+                                    {
+                                        IsContainer = true,
+                                        Children = new ITreeElement[]
+                                        {
+                                            new TestElement()
+                                            {
+                                                IsContainer = true,
+                                                Children = new ITreeElement[]
+                                                {
+                                                    new TestElement()
+                                                    {
+                                                        IsContainer = true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+        }
+        private static ITreeElement GetTree_Wide()
+        {
+            // R
+            // +---C
+            //     +---L
+            //     +---L
+            //     +---L
+            //     +---L
+            //     +---L
+            //
+            // ...x 10
+
+            return new TestElement()
+            {
+                IsContainer = true,
+                Children = new ITreeElement[]
+                {
+                    GetTree_OneLevel_OnlyLeaves(5),
+                    GetTree_OneLevel_OnlyLeaves(5),
+                    GetTree_OneLevel_OnlyLeaves(5),
+                    GetTree_OneLevel_OnlyLeaves(5),
+                    GetTree_OneLevel_OnlyLeaves(5),
+                    GetTree_OneLevel_OnlyLeaves(5),
+                    GetTree_OneLevel_OnlyLeaves(5),
+                    GetTree_OneLevel_OnlyLeaves(5),
+                    GetTree_OneLevel_OnlyLeaves(5),
+                    GetTree_OneLevel_OnlyLeaves(5)
                 }
             };
         }
