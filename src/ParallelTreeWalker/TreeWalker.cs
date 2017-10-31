@@ -127,9 +127,7 @@ namespace ParallelTreeWalker
 
         private bool TryProcessingNextContainer()
         {
-            T container;
-
-            if (!_containerCollection.TryTake(out container))
+            if (!_containerCollection.TryTake(out var container))
                 return false;
 
 #pragma warning disable CS4014

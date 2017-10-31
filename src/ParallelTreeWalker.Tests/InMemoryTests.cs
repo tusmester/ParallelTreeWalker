@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using System.Linq;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ParallelTreeWalker.Tests
 {
@@ -109,9 +109,9 @@ namespace ParallelTreeWalker.Tests
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            await TreeWalker<TestElement>.WalkAsync(root, async (el) =>
+            await TreeWalker<TestElement>.WalkAsync(root, async el =>
             {
-                Trace.WriteLine(string.Format("##PTW> STARTTIME: {0}", DateTime.UtcNow.ToLongTimeString()));
+                Trace.WriteLine($"##PTW> STARTTIME: {DateTime.UtcNow.ToLongTimeString()}");
 
                 if (delay > 0)
                     await Task.Delay(delay);
@@ -121,12 +121,12 @@ namespace ParallelTreeWalker.Tests
                 allElements.Add(el);
             }, new TreeWalkerOptions
             {
-                MaxDegreeOfParallelism = maxParallel,
+                MaxDegreeOfParallelism = maxParallel
             });
 
             stopwatch.Stop();
 
-            Trace.WriteLine(string.Format("##PTW> ELAPSED: {0}", stopwatch.ElapsedMilliseconds));
+            Trace.WriteLine($"##PTW> ELAPSED: {stopwatch.ElapsedMilliseconds}");
 
             if (delay > 0)
             {
@@ -146,7 +146,7 @@ namespace ParallelTreeWalker.Tests
         }
         private static TestElement GetTree_EmptyContainer()
         {
-            return new TestElement() { IsContainer = true };
+            return new TestElement { IsContainer = true };
         }
         private static TestElement GetTree_OneLevel_OnlyContainers()
         {
@@ -154,12 +154,13 @@ namespace ParallelTreeWalker.Tests
             // +---C
             // +---C
 
-            return new TestElement() {
+            return new TestElement
+            {
                 IsContainer = true,
-                Children = new TestElement[] 
+                Children = new[] 
                 {
-                    new TestElement() { IsContainer = true },
-                    new TestElement() { IsContainer = true }
+                    new TestElement { IsContainer = true },
+                    new TestElement { IsContainer = true }
                 }
             };
         }
@@ -170,7 +171,7 @@ namespace ParallelTreeWalker.Tests
             // +---L
             // +...
 
-            return new TestElement()
+            return new TestElement
             {
                 IsContainer = true,
                 Children = Enumerable.Range(0, leafCount).Select(i => new TestElement()).ToArray()
@@ -184,13 +185,13 @@ namespace ParallelTreeWalker.Tests
             // +---L
             // +---L
 
-            return new TestElement()
+            return new TestElement
             {
                 IsContainer = true,
-                Children = new TestElement[]
+                Children = new[]
                 {
-                    new TestElement() { IsContainer = true },
-                    new TestElement() { IsContainer = true },
+                    new TestElement { IsContainer = true },
+                    new TestElement { IsContainer = true },
                     new TestElement(),
                     new TestElement()
                 }
@@ -206,10 +207,10 @@ namespace ParallelTreeWalker.Tests
             //     +---L
             //     +---L
 
-            return new TestElement()
+            return new TestElement
             {
                 IsContainer = true,
-                Children = new TestElement[]
+                Children = new[]
                 {
                     GetTree_OneLevel_OnlyLeaves(),
                     GetTree_OneLevel_OnlyLeaves()
@@ -228,20 +229,20 @@ namespace ParallelTreeWalker.Tests
             //     +---L
             //     +---L
 
-            return new TestElement()
+            return new TestElement
             {
                 IsContainer = true,
-                Children = new TestElement[]
+                Children = new[]
                 {
                     new TestElement
                     {
                         IsContainer = true,
-                        Children = new TestElement[]
+                        Children = new[]
                         {
                             new TestElement
                             {
                                 IsContainer = true,
-                                Children = new TestElement[]
+                                Children = new[]
                                 {
                                     GetTree_OneLevel_OnlyLeaves()
                                 }
@@ -276,20 +277,20 @@ namespace ParallelTreeWalker.Tests
             //     +---L
             //     +---L
 
-            return new TestElement()
+            return new TestElement
             {
                 IsContainer = true,
-                Children = new TestElement[]
+                Children = new[]
                 {
                     new TestElement
                     {
                         IsContainer = true,
-                        Children = new TestElement[]
+                        Children = new[]
                         {
                             new TestElement
                             {
                                 IsContainer = true,
-                                Children = new TestElement[]
+                                Children = new[]
                                 {
                                     GetTree_OneLevel_OnlyLeaves(4),
                                     GetTree_OneLevel_OnlyLeaves(4),
@@ -311,32 +312,32 @@ namespace ParallelTreeWalker.Tests
             //             +---C
             //                 +---C
 
-            return new TestElement()
+            return new TestElement
             {
                 IsContainer = true,
-                Children = new TestElement[]
+                Children = new[]
                 {
-                    new TestElement()
+                    new TestElement
                     {
                         IsContainer = true,
-                        Children = new TestElement[]
+                        Children = new[]
                         {
-                            new TestElement()
+                            new TestElement
                             {
                                 IsContainer = true,
-                                Children = new TestElement[]
+                                Children = new[]
                                 {
-                                    new TestElement()
+                                    new TestElement
                                     {
                                         IsContainer = true,
-                                        Children = new TestElement[]
+                                        Children = new[]
                                         {
-                                            new TestElement()
+                                            new TestElement
                                             {
                                                 IsContainer = true,
-                                                Children = new TestElement[]
+                                                Children = new[]
                                                 {
-                                                    new TestElement()
+                                                    new TestElement
                                                     {
                                                         IsContainer = true
                                                     }
@@ -363,10 +364,10 @@ namespace ParallelTreeWalker.Tests
             //
             // ...x 10
 
-            return new TestElement()
+            return new TestElement
             {
                 IsContainer = true,
-                Children = new TestElement[]
+                Children = new[]
                 {
                     GetTree_OneLevel_OnlyLeaves(5),
                     GetTree_OneLevel_OnlyLeaves(5),

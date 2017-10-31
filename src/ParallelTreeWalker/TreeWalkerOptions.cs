@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ParallelTreeWalker
+﻿namespace ParallelTreeWalker
 {
     /// <summary>
     /// Options for customizing the tree walker behavior.
@@ -15,17 +9,8 @@ namespace ParallelTreeWalker
         /// Determines how many concurrent operations may occur at the same time. 
         /// Default is 5. 1 means sequential processing.
         /// </summary>
-        public int MaxDegreeOfParallelism { get; set; }
+        public int MaxDegreeOfParallelism { get; set; } = 5;
 
         internal static TreeWalkerOptions Default { get; } = new TreeWalkerOptions();
-
-        /// <summary>
-        /// Creates a new instance of ImportOptions for configuring the import behavior.
-        /// </summary>
-        public TreeWalkerOptions()
-        {
-            // default values
-            MaxDegreeOfParallelism = 5;
-        }
     }
 }

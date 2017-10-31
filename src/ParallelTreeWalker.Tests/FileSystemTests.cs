@@ -1,13 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ParallelTreeWalker.Elements;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ParallelTreeWalker.Elements;
 
 namespace ParallelTreeWalker.Tests
 {
@@ -25,8 +24,10 @@ namespace ParallelTreeWalker.Tests
             var actual = string.Join(Environment.NewLine, allVisitedPath);
 
             // expected results: enumerate manually, add root dir and sort
-            var expected = string.Join(Environment.NewLine, 
-                Enumerable.Union(new List<string> { rootDir }, Directory.EnumerateFileSystemEntries(rootDir, "*", SearchOption.AllDirectories)).OrderBy(p => p));
+            var expected = string.Join(Environment.NewLine,
+                new List<string> {rootDir}
+                    .Union(Directory.EnumerateFileSystemEntries(rootDir, "*", SearchOption.AllDirectories))
+                    .OrderBy(p => p));
 
             Assert.AreEqual(expected, actual);
         }
@@ -35,16 +36,16 @@ namespace ParallelTreeWalker.Tests
         {
             var allPaths = new ConcurrentBag<string>();
 
-            await TreeWalker<FileSystemElement>.WalkAsync(root, (el) =>
+            await TreeWalker<FileSystemElement>.WalkAsync(root, el =>
             {
-                Trace.WriteLine(string.Format("##PTW> {0} Path: {1}", DateTime.UtcNow.ToLongTimeString(), el.Path));
+                Trace.WriteLine($"##PTW> {DateTime.UtcNow.ToLongTimeString()} Path: {el.Path}");
 
                 allPaths.Add(el.Path);
 
                 return Task.FromResult<object>(null);
             }, new TreeWalkerOptions
             {
-                MaxDegreeOfParallelism = maxParallel,
+                MaxDegreeOfParallelism = maxParallel
             });
 
             return allPaths.OrderBy(p => p).ToArray();
@@ -59,14 +60,14 @@ namespace ParallelTreeWalker.Tests
             if (Directory.Exists(rootDir))
                 Directory.Delete(rootDir, true);
 
-            var subDirs = new string[]
+            var subDirs = new[]
             {
                 Path.Combine(rootDir, @"F1\F11"),
                 Path.Combine(rootDir, @"F1\F12"),
                 Path.Combine(rootDir, @"F2\F21"),
                 Path.Combine(rootDir, @"F2\F22"),
                 Path.Combine(rootDir, @"F3\F31"),
-                Path.Combine(rootDir, @"F3\F32"),
+                Path.Combine(rootDir, @"F3\F32")
             };
 
             foreach (var subDir in subDirs)
