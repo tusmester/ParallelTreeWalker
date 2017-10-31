@@ -12,19 +12,18 @@ An extensible and highly scalable **.Net component** for processing elements in 
 ## Usage
 First implement the *ITreeElement* interface (relax, it is simple) to represent your tree element - or if you want to discover the file system, you can use the built-in *FileSystemElement* class.
 
-Just call the *WalkAsync* method with a root element and it will do the rest. In the options parameter you can define a callback function (*ProcessElementAsync*) that will be executed every time a tree element is reached.
+Just call the *WalkAsync* method with a root element and it will do the rest. You can define a callback function that will be executed every time a tree element is reached.
 
 ```c#
-await TreeWalker.WalkAsync(root, new TreeWalkerOptions
+await TreeWalker<FileSystemElement>.WalkAsync(root, async (element) =>
 {
-    MaxDegreeOfParallelism = 5,
-    ProcessElementAsync = async (element) =>
-    {
-        var el = element as FileSystemElement;
-        var path = el.Path;
-        var isDirectory = el.IsDirectory;
-        
-        await DoStuffAsync(el);
-    }
+    var path = element.Path;
+    var isDirectory = element.IsDirectory;
+
+    await DoStuffAsync(element);
+}, 
+new TreeWalkerOptions
+{
+    MaxDegreeOfParallelism = 10
 });
 ```
