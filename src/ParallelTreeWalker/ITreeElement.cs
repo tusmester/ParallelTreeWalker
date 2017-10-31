@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ParallelTreeWalker
 {
-    public interface ITreeElement
+    public interface ITreeElement<T> where T:ITreeElement<T>
     {
-        IEnumerable<ITreeElement> Children { get; }
+        IEnumerable<T> Children { get; }
         bool IsContainer { get; }
     }
 }

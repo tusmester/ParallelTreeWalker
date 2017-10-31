@@ -17,12 +17,6 @@ namespace ParallelTreeWalker
         /// </summary>
         public int MaxDegreeOfParallelism { get; set; }
 
-        /// <summary>
-        /// Called every time when a tree element is reached. This is the place for element
-        /// processing (e.g. uploading a file). The method is called with await.
-        /// </summary>
-        public Func<ITreeElement, Task> ProcessElementAsync { get; set; }
-
         internal static TreeWalkerOptions Default { get; } = new TreeWalkerOptions();
 
         /// <summary>
