@@ -5,12 +5,12 @@ using System.Linq;
 
 namespace ParallelTreeWalker.Elements
 {
-    public class FileSystemElement : ITreeElement
+    public class FileSystemElement : ITreeElement<FileSystemElement>
     {
         public string Path { get; private set; }
         public bool IsContainer { get; private set; }
 
-        public IEnumerable<ITreeElement> Children
+        public IEnumerable<FileSystemElement> Children
         {
             get
             {

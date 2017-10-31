@@ -31,23 +31,20 @@ namespace ParallelTreeWalker.Tests
             Assert.AreEqual(expected, actual);
         }
 
-        public async Task<string[]> TestWalk(ITreeElement root, int maxParallel)
+        public async Task<string[]> TestWalk(FileSystemElement root, int maxParallel)
         {
             var allPaths = new ConcurrentBag<string>();
 
-            await TreeWalker.WalkAsync(root, new TreeWalkerOptions
+            await TreeWalker<FileSystemElement>.WalkAsync(root, (el) =>
+            {
+                Trace.WriteLine(string.Format("##PTW> {0} Path: {1}", DateTime.UtcNow.ToLongTimeString(), el.Path));
+
+                allPaths.Add(el.Path);
+
+                return Task.FromResult<object>(null);
+            }, new TreeWalkerOptions
             {
                 MaxDegreeOfParallelism = maxParallel,
-                ProcessElementAsync = (element) =>
-                {
-                    var el = element as FileSystemElement;
-
-                    Trace.WriteLine(string.Format("##PTW> {0} Path: {1}", DateTime.UtcNow.ToLongTimeString(), el.Path));
-
-                    allPaths.Add(el.Path);
-
-                    return Task.FromResult<object>(null);
-                }
             });
 
             return allPaths.OrderBy(p => p).ToArray();

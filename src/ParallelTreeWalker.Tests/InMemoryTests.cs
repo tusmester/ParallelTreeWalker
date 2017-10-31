@@ -8,9 +8,9 @@ using System.Diagnostics;
 
 namespace ParallelTreeWalker.Tests
 {
-    public class TestElement : ITreeElement
+    public class TestElement : ITreeElement<TestElement>
     {
-        public IEnumerable<ITreeElement> Children { get; set; }
+        public IEnumerable<TestElement> Children { get; set; }
         public bool IsContainer { get; set; }
         public bool Visited { get; set; }
     }
@@ -18,6 +18,15 @@ namespace ParallelTreeWalker.Tests
     [TestClass]
     public class InMemoryTests
     {
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task NullFunction()
+        {
+            var root = new TestElement();
+
+            await TreeWalker<TestElement>.WalkAsync(root, null);
+        }
+
         //====================================================================== Visitor tests
 
         [TestMethod]
@@ -94,27 +103,25 @@ namespace ParallelTreeWalker.Tests
 
         //====================================================================== Walk
 
-        public async Task TestWalk(ITreeElement root, int elementCount, int maxParallel, int delay = 0, int expectedMinTime = 0, int expectedMaxTime = 0)
+        public async Task TestWalk(TestElement root, int elementCount, int maxParallel, int delay = 0, int expectedMinTime = 0, int expectedMaxTime = 0)
         {
             var allElements = new ConcurrentBag<TestElement>();
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            await TreeWalker.WalkAsync(root, new TreeWalkerOptions
+            await TreeWalker<TestElement>.WalkAsync(root, async (el) =>
+            {
+                Trace.WriteLine(string.Format("##PTW> STARTTIME: {0}", DateTime.UtcNow.ToLongTimeString()));
+
+                if (delay > 0)
+                    await Task.Delay(delay);
+                
+                el.Visited = true;
+
+                allElements.Add(el);
+            }, new TreeWalkerOptions
             {
                 MaxDegreeOfParallelism = maxParallel,
-                ProcessElementAsync = async (element) =>
-                {
-                    Trace.WriteLine(string.Format("##PTW> STARTTIME: {0}", DateTime.UtcNow.ToLongTimeString()));
-
-                    if (delay > 0)
-                        await Task.Delay(delay);
-
-                    var el = element as TestElement;
-                    el.Visited = true;
-
-                    allElements.Add(el);
-                }
             });
 
             stopwatch.Stop();
@@ -133,15 +140,15 @@ namespace ParallelTreeWalker.Tests
 
         //====================================================================== Generate trees
 
-        private static ITreeElement GetTree_EmptyLeaf()
+        private static TestElement GetTree_EmptyLeaf()
         {
             return new TestElement();
         }
-        private static ITreeElement GetTree_EmptyContainer()
+        private static TestElement GetTree_EmptyContainer()
         {
             return new TestElement() { IsContainer = true };
         }
-        private static ITreeElement GetTree_OneLevel_OnlyContainers()
+        private static TestElement GetTree_OneLevel_OnlyContainers()
         {
             // R
             // +---C
@@ -156,7 +163,7 @@ namespace ParallelTreeWalker.Tests
                 }
             };
         }
-        private static ITreeElement GetTree_OneLevel_OnlyLeaves(int leafCount = 2)
+        private static TestElement GetTree_OneLevel_OnlyLeaves(int leafCount = 2)
         {
             // R
             // +---L
@@ -169,7 +176,7 @@ namespace ParallelTreeWalker.Tests
                 Children = Enumerable.Range(0, leafCount).Select(i => new TestElement()).ToArray()
             };
         }
-        private static ITreeElement GetTree_OneLevel_Mixed()
+        private static TestElement GetTree_OneLevel_Mixed()
         {
             // R
             // +---C
@@ -189,7 +196,7 @@ namespace ParallelTreeWalker.Tests
                 }
             };
         }
-        private static ITreeElement GetTree_TwoLevels_Balanced()
+        private static TestElement GetTree_TwoLevels_Balanced()
         {
             // R
             // +---C
@@ -202,14 +209,14 @@ namespace ParallelTreeWalker.Tests
             return new TestElement()
             {
                 IsContainer = true,
-                Children = new ITreeElement[]
+                Children = new TestElement[]
                 {
                     GetTree_OneLevel_OnlyLeaves(),
                     GetTree_OneLevel_OnlyLeaves()
                 }
             };
         }
-        private static ITreeElement GetTree_FourLevels_Unbalanced()
+        private static TestElement GetTree_FourLevels_Unbalanced()
         {
             // R
             // +---C
@@ -224,17 +231,17 @@ namespace ParallelTreeWalker.Tests
             return new TestElement()
             {
                 IsContainer = true,
-                Children = new ITreeElement[]
+                Children = new TestElement[]
                 {
                     new TestElement
                     {
                         IsContainer = true,
-                        Children = new ITreeElement[]
+                        Children = new TestElement[]
                         {
                             new TestElement
                             {
                                 IsContainer = true,
-                                Children = new ITreeElement[]
+                                Children = new TestElement[]
                                 {
                                     GetTree_OneLevel_OnlyLeaves()
                                 }
@@ -245,7 +252,7 @@ namespace ParallelTreeWalker.Tests
                 }
             };
         }
-        private static ITreeElement GetTree_FourLevels_Unbalanced_2()
+        private static TestElement GetTree_FourLevels_Unbalanced_2()
         {
             // R
             // +---C
@@ -272,17 +279,17 @@ namespace ParallelTreeWalker.Tests
             return new TestElement()
             {
                 IsContainer = true,
-                Children = new ITreeElement[]
+                Children = new TestElement[]
                 {
                     new TestElement
                     {
                         IsContainer = true,
-                        Children = new ITreeElement[]
+                        Children = new TestElement[]
                         {
                             new TestElement
                             {
                                 IsContainer = true,
-                                Children = new ITreeElement[]
+                                Children = new TestElement[]
                                 {
                                     GetTree_OneLevel_OnlyLeaves(4),
                                     GetTree_OneLevel_OnlyLeaves(4),
@@ -295,7 +302,7 @@ namespace ParallelTreeWalker.Tests
                 }
             };
         }
-        private static ITreeElement GetTree_Deep()
+        private static TestElement GetTree_Deep()
         {
             // R
             // +---C
@@ -307,27 +314,27 @@ namespace ParallelTreeWalker.Tests
             return new TestElement()
             {
                 IsContainer = true,
-                Children = new ITreeElement[]
+                Children = new TestElement[]
                 {
                     new TestElement()
                     {
                         IsContainer = true,
-                        Children = new ITreeElement[]
+                        Children = new TestElement[]
                         {
                             new TestElement()
                             {
                                 IsContainer = true,
-                                Children = new ITreeElement[]
+                                Children = new TestElement[]
                                 {
                                     new TestElement()
                                     {
                                         IsContainer = true,
-                                        Children = new ITreeElement[]
+                                        Children = new TestElement[]
                                         {
                                             new TestElement()
                                             {
                                                 IsContainer = true,
-                                                Children = new ITreeElement[]
+                                                Children = new TestElement[]
                                                 {
                                                     new TestElement()
                                                     {
@@ -344,7 +351,7 @@ namespace ParallelTreeWalker.Tests
                 }
             };
         }
-        private static ITreeElement GetTree_Wide()
+        private static TestElement GetTree_Wide()
         {
             // R
             // +---C
@@ -359,7 +366,7 @@ namespace ParallelTreeWalker.Tests
             return new TestElement()
             {
                 IsContainer = true,
-                Children = new ITreeElement[]
+                Children = new TestElement[]
                 {
                     GetTree_OneLevel_OnlyLeaves(5),
                     GetTree_OneLevel_OnlyLeaves(5),
