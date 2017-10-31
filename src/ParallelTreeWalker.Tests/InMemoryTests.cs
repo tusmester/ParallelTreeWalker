@@ -18,6 +18,15 @@ namespace ParallelTreeWalker.Tests
     [TestClass]
     public class InMemoryTests
     {
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task NullFunction()
+        {
+            var root = new TestElement();
+
+            await TreeWalker<TestElement>.WalkAsync(root, null);
+        }
+
         //====================================================================== Visitor tests
 
         [TestMethod]

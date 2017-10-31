@@ -35,7 +35,7 @@ namespace ParallelTreeWalker.Tests
         {
             var allPaths = new ConcurrentBag<string>();
 
-            await TreeWalker< FileSystemElement>.WalkAsync(root, (el) =>
+            await TreeWalker<FileSystemElement>.WalkAsync(root, (el) =>
             {
                 Trace.WriteLine(string.Format("##PTW> {0} Path: {1}", DateTime.UtcNow.ToLongTimeString(), el.Path));
 

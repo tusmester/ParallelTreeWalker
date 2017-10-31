@@ -36,11 +36,15 @@ namespace ParallelTreeWalker
         /// Processes elements in a tree in parallel. Parent items are always processed before their children.
         /// </summary>
         /// <param name="root">Root element of the tree.</param>
+        /// <param name="processElementAsync">A function that is called every time when a tree element 
+        /// is reached. This is the place for element processing (e.g. uploading a file).</param>
         /// <param name="options">Options for customizing tree processing.</param>
         public static async Task WalkAsync(T root, Func<T,Task> processElementAsync, TreeWalkerOptions options = null)
         {
             if (root == null)
                 throw new ArgumentNullException("root");
+            if (processElementAsync == null)
+                throw new ArgumentNullException("processElementAsync");
 
             // create an instance to let clients start multiple tree walk operations in parallel
             var treeWalker = new TreeWalker<T>(root, processElementAsync, options);
