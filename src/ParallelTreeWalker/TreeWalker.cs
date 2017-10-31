@@ -109,7 +109,7 @@ namespace ParallelTreeWalker
                 if (element.IsContainer)
                     _containerCollection.TryAdd(element);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //UNDONE: handle error
             }
