@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace ParallelTreeWalker.Elements
+namespace Skraalsoft.ParallelTreewalker.Elements
 {
-    public class FileSystemElement : ITreeElement
+    public class FileSystemElement : ITreeElement<FileSystemElement>
     {
-        public string Path { get; private set; }
-        public bool IsContainer { get; private set; }
+        public string Path { get; }
+        public bool IsContainer { get; }
 
-        public IEnumerable<ITreeElement> Children
+        public IEnumerable<FileSystemElement> Children
         {
             get
             {

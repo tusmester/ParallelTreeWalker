@@ -1,34 +1,33 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ParallelTreeWalker
+namespace Skraalsoft.ParallelTreewalker
 {
-    public class TreeWalker
+    public class TreeWalker<T> where T:ITreeElement<T>
     {
-        private readonly ITreeElement _rootElement;
+        private readonly T _rootElement;
+        private readonly Func<T, Task> _processElementAsync;
         private readonly TreeWalkerOptions _options;
 
         private readonly SemaphoreSlim _workerSemaphore;
         private readonly SemaphoreSlim _mainSemaphore;
-        private readonly IProducerConsumerCollection<ITreeElement> _containerCollection;
+        private readonly IProducerConsumerCollection<T> _containerCollection;
 
         //================================================================================================== Construction
 
-        private TreeWalker(ITreeElement root, TreeWalkerOptions options = null)
+        private TreeWalker(T root, Func<T, Task> processElementAsync, TreeWalkerOptions options = null)
         {
             _rootElement = root;
+            _processElementAsync = processElementAsync;
             _options = options ?? TreeWalkerOptions.Default;
 
             _workerSemaphore = new SemaphoreSlim(_options.MaxDegreeOfParallelism);
             _mainSemaphore = new SemaphoreSlim(1);
 
             // a LIFO collection for storing containers temporarily for later processing 
-            _containerCollection = new ConcurrentStack<ITreeElement>();
+            _containerCollection = new ConcurrentStack<T>();
         }
 
         //================================================================================================== Static API
@@ -37,14 +36,18 @@ namespace ParallelTreeWalker
         /// Processes elements in a tree in parallel. Parent items are always processed before their children.
         /// </summary>
         /// <param name="root">Root element of the tree.</param>
+        /// <param name="processElementAsync">A function that is called every time when a tree element 
+        /// is reached. This is the place for element processing (e.g. uploading a file).</param>
         /// <param name="options">Options for customizing tree processing.</param>
-        public static async Task WalkAsync(ITreeElement root, TreeWalkerOptions options = null)
+        public static async Task WalkAsync(T root, Func<T,Task> processElementAsync, TreeWalkerOptions options = null)
         {
             if (root == null)
                 throw new ArgumentNullException("root");
+            if (processElementAsync == null)
+                throw new ArgumentNullException("processElementAsync");
 
             // create an instance to let clients start multiple tree walk operations in parallel
-            var treeWalker = new TreeWalker(root, options);
+            var treeWalker = new TreeWalker<T>(root, processElementAsync, options);
 
             await treeWalker.WalkInternalAsync();
         }
@@ -57,7 +60,7 @@ namespace ParallelTreeWalker
             await _mainSemaphore.WaitAsync();
 
             //process root element first
-            await _options.ProcessElementAsync(_rootElement);
+            await _processElementAsync(_rootElement);
 
             // algorithm: recursive, limited by the max degree of parallelism option
             await StartProcessingChildrenAsync(_rootElement);
@@ -73,7 +76,7 @@ namespace ParallelTreeWalker
             await _mainSemaphore.WaitAsync();
         }
 
-        private async Task StartProcessingChildrenAsync(ITreeElement element)
+        private async Task StartProcessingChildrenAsync(T element)
         {
             // This methods enumerates direct child elements and starts
             // tasks for creating them - but only in a pace as there are
@@ -100,17 +103,17 @@ namespace ParallelTreeWalker
             if (TreeWalkIsCompleted())
                 _mainSemaphore.Release();
         }
-        private async Task ProcessElementAsync(ITreeElement element)
+        private async Task ProcessElementAsync(T element)
         {
             try
             {
-                await _options.ProcessElementAsync(element);
+                await _processElementAsync(element);
 
                 // after a container has been processed, it is allowed to deal with its children
                 if (element.IsContainer)
                     _containerCollection.TryAdd(element);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //UNDONE: handle error
             }
@@ -124,9 +127,7 @@ namespace ParallelTreeWalker
 
         private bool TryProcessingNextContainer()
         {
-            ITreeElement container;
-
-            if (!_containerCollection.TryTake(out container))
+            if (!_containerCollection.TryTake(out var container))
                 return false;
 
 #pragma warning disable CS4014

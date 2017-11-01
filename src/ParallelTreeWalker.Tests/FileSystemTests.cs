@@ -1,15 +1,14 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ParallelTreeWalker.Elements;
+using Skraalsoft.ParallelTreewalker.Elements;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace ParallelTreeWalker.Tests
+namespace Skraalsoft.ParallelTreewalker.Tests
 {
     [TestClass]
     public class FileSystemTests
@@ -25,29 +24,28 @@ namespace ParallelTreeWalker.Tests
             var actual = string.Join(Environment.NewLine, allVisitedPath);
 
             // expected results: enumerate manually, add root dir and sort
-            var expected = string.Join(Environment.NewLine, 
-                Enumerable.Union(new List<string> { rootDir }, Directory.EnumerateFileSystemEntries(rootDir, "*", SearchOption.AllDirectories)).OrderBy(p => p));
+            var expected = string.Join(Environment.NewLine,
+                new List<string> {rootDir}
+                    .Union(Directory.EnumerateFileSystemEntries(rootDir, "*", SearchOption.AllDirectories))
+                    .OrderBy(p => p));
 
             Assert.AreEqual(expected, actual);
         }
 
-        public async Task<string[]> TestWalk(ITreeElement root, int maxParallel)
+        public async Task<string[]> TestWalk(FileSystemElement root, int maxParallel)
         {
             var allPaths = new ConcurrentBag<string>();
 
-            await TreeWalker.WalkAsync(root, new TreeWalkerOptions
+            await TreeWalker<FileSystemElement>.WalkAsync(root, el =>
             {
-                MaxDegreeOfParallelism = maxParallel,
-                ProcessElementAsync = (element) =>
-                {
-                    var el = element as FileSystemElement;
+                Trace.WriteLine($"##PTW> {DateTime.UtcNow.ToLongTimeString()} Path: {el.Path}");
 
-                    Trace.WriteLine(string.Format("##PTW> {0} Path: {1}", DateTime.UtcNow.ToLongTimeString(), el.Path));
+                allPaths.Add(el.Path);
 
-                    allPaths.Add(el.Path);
-
-                    return Task.FromResult<object>(null);
-                }
+                return Task.FromResult<object>(null);
+            }, new TreeWalkerOptions
+            {
+                MaxDegreeOfParallelism = maxParallel
             });
 
             return allPaths.OrderBy(p => p).ToArray();
@@ -62,14 +60,14 @@ namespace ParallelTreeWalker.Tests
             if (Directory.Exists(rootDir))
                 Directory.Delete(rootDir, true);
 
-            var subDirs = new string[]
+            var subDirs = new[]
             {
                 Path.Combine(rootDir, @"F1\F11"),
                 Path.Combine(rootDir, @"F1\F12"),
                 Path.Combine(rootDir, @"F2\F21"),
                 Path.Combine(rootDir, @"F2\F22"),
                 Path.Combine(rootDir, @"F3\F31"),
-                Path.Combine(rootDir, @"F3\F32"),
+                Path.Combine(rootDir, @"F3\F32")
             };
 
             foreach (var subDir in subDirs)

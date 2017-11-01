@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace ParallelTreeWalker
+namespace Skraalsoft.ParallelTreewalker
 {
-    public interface ITreeElement
+    public interface ITreeElement<T> where T:ITreeElement<T>
     {
-        IEnumerable<ITreeElement> Children { get; }
+        IEnumerable<T> Children { get; }
         bool IsContainer { get; }
     }
 }
