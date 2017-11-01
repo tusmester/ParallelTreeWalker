@@ -1,4 +1,4 @@
-﻿namespace ParallelTreeWalker
+﻿namespace Skraalsoft.ParallelTreewalker
 {
     /// <summary>
     /// Options for customizing the tree walker behavior.

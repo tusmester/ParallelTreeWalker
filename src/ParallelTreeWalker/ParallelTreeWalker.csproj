@@ -12,6 +12,8 @@
     <RepositoryUrl>https://github.com/tusmester/ParallelTreeWalker</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>async treewalk parallel</PackageTags>
+    <RootNamespace>Skraalsoft.ParallelTreewalker</RootNamespace>
+    <AssemblyName>Skraalsoft.ParallelTreeWalker</AssemblyName>
   </PropertyGroup>
 
 </Project>
