@@ -1,22 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Title>Skraalsoft Parallel TreeWalker</Title>
     <TargetFramework>netstandard2.0</TargetFramework>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <GeneratePackageOnBuild Condition="'$(Configuration)' != 'Debug'">True</GeneratePackageOnBuild>
     <Version>2.0.0</Version>
     <Authors>tusmester, Bianco Veigel</Authors>
+    <Owners>tusmester</Owners>
     <Description>An extensible and scalable .Net component for processing elements in a tree in an async and parallel way.</Description>
     <PackageLicenseUrl>https://github.com/tusmester/ParallelTreeWalker/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/tusmester/ParallelTreeWalker</PackageProjectUrl>
     <RepositoryUrl>https://github.com/tusmester/ParallelTreeWalker</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>async treewalk parallel</PackageTags>
-    <RootNamespace>Skraalsoft.ParallelTreewalker</RootNamespace>
+    <RootNamespace>Skraalsoft.ParallelTreeWalker</RootNamespace>
     <AssemblyName>Skraalsoft.ParallelTreeWalker</AssemblyName>
     <Company>tusmester</Company>
-    <Product>Skraalsoft Parallel TreeWalker</Product>
-    <PackageIconUrl>https://github.com/tusmester/ParallelTreeWalker/blob/master/img/icon.png</PackageIconUrl>
+    <Product>Skraalsoft Parallel TreeWalker</Product>    
+    <PackageIconUrl>https://raw.githubusercontent.com/tusmester/ParallelTreeWalker/master/img/icon.png</PackageIconUrl>    
+    <Copyright>Copyright © tusmester</Copyright>
   </PropertyGroup>
 
 </Project>
