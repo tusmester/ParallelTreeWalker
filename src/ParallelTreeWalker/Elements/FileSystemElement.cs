@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Skraalsoft.ParallelTreewalker.Elements
+namespace Skraalsoft.ParallelTreeWalker.Elements
 {
     public class FileSystemElement : ITreeElement<FileSystemElement>
     {

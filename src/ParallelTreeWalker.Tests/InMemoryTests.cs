@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Skraalsoft.ParallelTreewalker.Tests
+namespace Skraalsoft.ParallelTreeWalker.Tests
 {
     public class TestElement : ITreeElement<TestElement>
     {

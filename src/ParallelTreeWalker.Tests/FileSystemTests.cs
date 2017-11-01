@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Skraalsoft.ParallelTreewalker.Elements;
+using Skraalsoft.ParallelTreeWalker.Elements;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Skraalsoft.ParallelTreewalker.Tests
+namespace Skraalsoft.ParallelTreeWalker.Tests
 {
     [TestClass]
     public class FileSystemTests
