@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ParallelTreeWalker
+namespace Skraalsoft.ParallelTreewalker
 {
     public class TreeWalker<T> where T:ITreeElement<T>
     {

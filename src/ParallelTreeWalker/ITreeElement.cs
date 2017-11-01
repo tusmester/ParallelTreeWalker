@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ParallelTreeWalker
+namespace Skraalsoft.ParallelTreewalker
 {
     public interface ITreeElement<T> where T:ITreeElement<T>
     {

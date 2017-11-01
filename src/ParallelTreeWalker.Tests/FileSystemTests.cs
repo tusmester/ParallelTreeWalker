@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Skraalsoft.ParallelTreewalker.Elements;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ParallelTreeWalker.Elements;
 
-namespace ParallelTreeWalker.Tests
+namespace Skraalsoft.ParallelTreewalker.Tests
 {
     [TestClass]
     public class FileSystemTests
